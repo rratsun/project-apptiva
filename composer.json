@@ -1,9 +1,8 @@
 {
   "name": "treolabs/project-apptiva",
   "require": {
-    "treolabs/treocore": "~3.23.0",
-    "treolabs/pim": "~3.10.26",
-    "treolabs/product-variants": "~2.5.0"
+    "treolabs/treocore": "~3.23.33",
+    "treolabs/product-variants": "~2.5.1"
   },
   "autoload": {
     "psr-4": {

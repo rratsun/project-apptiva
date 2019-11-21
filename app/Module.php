@@ -39,4 +39,18 @@ class Module extends AbstractModule
     {
         return 9999;
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function loadMetadata(\stdClass &$data)
+    {
+        parent::loadMetadata($data);
+
+        if (isset($data->clientDefs->Product->bottomPanels->detail[0]->view)
+            && $data->clientDefs->Product->bottomPanels->detail[0]->view == 'product-variants:views/product/record/panels/variants-configuration') {
+            $data->clientDefs->Product->bottomPanels->detail[0]->view = 'project-apptiva:views/product/record/panels/variants-configuration';
+        }
+        $data->productVariant->validation->skipIsAttributesUnique = true;
+    }
 }
