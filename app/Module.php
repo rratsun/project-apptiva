@@ -23,6 +23,7 @@ declare(strict_types=1);
 
 namespace ProjectApptiva;
 
+use Espo\Core\Utils\Json;
 use Treo\Core\ModuleManager\AbstractModule;
 
 /**
@@ -47,10 +48,22 @@ class Module extends AbstractModule
     {
         parent::loadMetadata($data);
 
-        if (isset($data->clientDefs->Product->bottomPanels->detail[0]->view)
-            && $data->clientDefs->Product->bottomPanels->detail[0]->view == 'product-variants:views/product/record/panels/variants-configuration') {
-            $data->clientDefs->Product->bottomPanels->detail[0]->view = 'project-apptiva:views/product/record/panels/variants-configuration';
+        // parse metadata
+        $metadata = Json::decode(Json::encode($data), true);
+
+        // replace view
+        if (isset($metadata['clientDefs']['Product']['bottomPanels'])) {
+            foreach ($metadata['clientDefs']['Product']['bottomPanels']['detail'] as $k => $row) {
+                if ($row['name'] == 'variantConfiguration') {
+                    $metadata['clientDefs']['Product']['bottomPanels']['detail'][$k]['view'] = 'project-apptiva:views/product/record/panels/variants-configuration';
+                }
+            }
         }
-        $data->productVariant->validation->skipIsAttributesUnique = true;
+
+        // skip validation
+        $metadata['productVariant']['validation']['skipIsAttributesUnique'] = true;
+
+        // parse metadata
+        $data = Json::decode(Json::encode($metadata));
     }
 }
