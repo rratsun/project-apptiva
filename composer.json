@@ -1,0 +1,25 @@
+{
+  "name": "treolabs/project-apptiva",
+  "require": {
+    "treolabs/treocore": "~3.23.0",
+    "treolabs/pim": "~3.10.26",
+    "treolabs/product-variants": "~2.5.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "ProjectApptiva\\": "app/"
+    }
+  },
+  "extra": {
+    "treoId": "ProjectApptiva",
+    "name": {
+      "default": "Project - Apptiva"
+    },
+    "description": {
+      "default": "-"
+    },
+    "tags": [
+      "project"
+    ]
+  }
+}
