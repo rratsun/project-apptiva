@@ -1,8 +1,8 @@
 {
   "name": "treolabs/project-apptiva",
   "require": {
-    "treolabs/treocore": ">=3.23.33 <3.25.0",
-    "treolabs/product-variants": "~2.5.1"
+    "treolabs/treocore": ">=3.23.33 <3.25.17",
+    "treolabs/product-variants": "~2.6.0"
   },
   "autoload": {
     "psr-4": {
