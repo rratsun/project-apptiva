@@ -34,6 +34,11 @@ Espo.define('project-apptiva:views/product/record/panels/variants-configuration'
             }
 
             return notValid
+        },
+
+        afterRender() {
+            Dep.prototype.afterRender.call(this);
+            $('.panel-variantConfiguration').hide();
         }
 
     })

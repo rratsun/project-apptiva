@@ -61,7 +61,7 @@ class Module extends AbstractModule
         }
 
         // skip validation
-        $metadata['productVariant']['validation']['skipIsAttributesUnique'] = true;
+        $metadata['productVariant']['validation']['skipAttributesValidation'] = true;
 
         // parse metadata
         $data = Json::decode(Json::encode($metadata));
