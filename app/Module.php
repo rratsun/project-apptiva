@@ -51,14 +51,14 @@ class Module extends AbstractModule
         // parse metadata
         $metadata = Json::decode(Json::encode($data), true);
 
-        // replace view
-        if (isset($metadata['clientDefs']['Product']['bottomPanels'])) {
-            foreach ($metadata['clientDefs']['Product']['bottomPanels']['detail'] as $k => $row) {
-                if ($row['name'] == 'variantConfiguration') {
-                    $metadata['clientDefs']['Product']['bottomPanels']['detail'][$k]['view'] = 'project-apptiva:views/product/record/panels/variants-configuration';
-                }
-            }
-        }
+        $metadata['clientDefs']['Product']['bottomPanels']['detail'] = [
+            [
+                'name'                        => 'variantConfiguration',
+                'label'                       => 'Variant Configuration',
+                'view'                        => 'project-apptiva:views/product/record/panels/variants-configuration',
+                'layoutRelationshipsDisabled' => 1
+            ]
+        ];
 
         // skip validation
         $metadata['productVariant']['validation']['skipAttributesValidation'] = true;
