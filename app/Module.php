@@ -19,4 +19,12 @@ class Module extends AbstractModule
     {
         return 9999;
     }
+
+    /**
+     * @return bool
+     */
+    public function isSystem(): bool
+    {
+        return true;
+    }
 }
