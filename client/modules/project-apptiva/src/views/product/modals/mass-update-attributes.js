@@ -367,7 +367,7 @@ Espo.define('project-apptiva:views/product/modals/mass-update-attributes', 'view
             this.selectData = this.options.selectData;
             this.byWhere = this.options.byWhere;
 
-            this.header = this.translate(this.scope, 'scopeNamesPlural') + ' &raquo ' + this.translate('Mass Update Attributes');
+            this.header = this.translate(this.scope, 'scopeNamesPlural') + ' &raquo ' + this.translate('Mass Update Attributes', 'label', 'Product');
         },
 
         /**

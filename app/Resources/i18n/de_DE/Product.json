@@ -1,4 +1,7 @@
 {
+  "label": {
+    "Mass Update Attributes": "Massenaktualisierungsattribute"
+  },
   "massActions": {
     "massAttributeUpdate": "Aktualisierung der Massenattribute",
     "No attributes available for Mass Update": "Keine Attribute für Massenaktualisierung verfügbar"
