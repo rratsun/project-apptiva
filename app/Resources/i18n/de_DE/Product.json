@@ -1,6 +1,6 @@
 {
   "massActions": {
-    "Mass attribute update": "Aktualisierung der Massenattribute",
+    "massAttributeUpdate": "Aktualisierung der Massenattribute",
     "No attributes available for Mass Update": "Keine Attribute für Massenaktualisierung verfügbar"
   },
   "exceptions": {

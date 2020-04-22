@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace ProjectApptiva\Services;
 
 use Pim\Services\Product;
+use Treo\Core\Utils\Util;
 
 /**
  * Class ApptivaProduct
@@ -19,19 +20,27 @@ class ApptivaProduct extends Product
      */
     public function getAttributesForMassUpdate(array $productsIds): array
     {
+        // prepare select
+        $select = [
+            'attributeId',
+            ['attribute.name', 'name'],
+            ['attribute.type', 'attributeType'],
+            ['attribute.isMultilang', 'attributeIsMultilang'],
+            ['attribute.typeValue', 'typeValue'],
+        ];
+
+        // for multiLang
+        if ($this->getConfig()->get('isMultilangActive', false)) {
+            foreach ($this->getConfig()->get('inputLanguageList', []) as $locale) {
+                $key = ucfirst(Util::toCamelCase(strtolower($locale)));
+                $select[] = ["attribute.typeValue$key", "typeValue$key"];
+            }
+        }
+
         $attributes = $this
             ->getEntityManager()
             ->getRepository('ProductAttributeValue')
-            ->select(
-                [
-                    'attributeId',
-                    ['attribute.name', 'name'],
-                    ['attribute.type', 'attributeType'],
-                    ['attribute.isMultilang', 'attributeIsMultilang'],
-                    ['attribute.typeValue', 'typeValue'],
-                    ['attribute.typeValueDeDe', 'typeValueDeDe'],
-                ]
-            )
+            ->select($select)
             ->where(
                 [
                     'productId' => $productsIds,
