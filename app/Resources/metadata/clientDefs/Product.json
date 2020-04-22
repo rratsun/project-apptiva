@@ -1,0 +1,19 @@
+{
+  "recordViews": {
+    "list": "project-apptiva:views/product/record/list"
+  },
+  "additionalMassActions": {
+    "actionMassUpdateAttributes": {
+      "name": "massAttributeUpdate",
+      "actionViewPath": "project-apptiva:views/product/actions/action-mass-update-attributes",
+      "action": "actionMassUpdateAttributes",
+      "optionsToPass": [
+        "checkedList",
+        "allResultIsChecked",
+        "collection",
+        "scope"
+      ],
+      "pushToCheckAllResultMassActionList": true
+    }
+  }
+}

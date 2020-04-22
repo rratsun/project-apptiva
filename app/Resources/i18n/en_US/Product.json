@@ -1,0 +1,9 @@
+{
+  "massActions": {
+    "massAttributeUpdate": "Mass Attribute Update",
+    "No attributes available for Mass Update": "No attributes available for Mass Update"
+  },
+  "exceptions": {
+    "Please, select at least one product": "Bitte wählen Sie mindestens ein Produkt aus"
+  }
+}
