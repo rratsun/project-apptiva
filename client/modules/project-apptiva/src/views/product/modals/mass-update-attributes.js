@@ -193,8 +193,6 @@ Espo.define('project-apptiva:views/product/modals/mass-update-attributes', 'view
             this.disableButton('update');
             if (this.isValidAttributes()) {
                 let count = 0;
-                let byQueueManager = false;
-                let i = 0;
                 this.renderedAtrributes.forEach(attributeId => {
                     this.notify('Saving...');
                     let whereUpdate = this.getWhereUpdate(attributeId);
@@ -215,6 +213,7 @@ Espo.define('project-apptiva:views/product/modals/mass-update-attributes', 'view
                     $.ajax({
                         url: 'ProductAttributeValue' + '/action/massUpdate',
                         type: 'PUT',
+                        async: false,
                         data: JSON.stringify({
                             attributes: attributes,
                             where: whereUpdate,
@@ -223,13 +222,6 @@ Espo.define('project-apptiva:views/product/modals/mass-update-attributes', 'view
                         }),
                         success: function (result) {
                             count += (result || {}).count;
-                            i++;
-                            if (result.byQueueManager) {
-                                byQueueManager = result.byQueueManager;
-                            }
-                            if (i >= this.renderedAtrributes.length) {
-                                this.trigger('after:update', count, byQueueManager);
-                            }
                         }.bind(this),
                         error: function () {
                             this.notify('Error occurred', 'error');
@@ -237,6 +229,8 @@ Espo.define('project-apptiva:views/product/modals/mass-update-attributes', 'view
                         }.bind(this)
                     });
                 });
+
+                this.trigger('after:update', count);
             }
         },
 
