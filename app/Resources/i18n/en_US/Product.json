@@ -1,4 +1,7 @@
 {
+  "labels": {
+    "Insert mode": "Insert mode"
+  },
   "massActions": {
     "massAttributeUpdate": "Mass Attribute Update",
     "No attributes available for Mass Update": "No attributes available for Mass Update"

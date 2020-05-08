@@ -15,13 +15,14 @@ class MassActions extends Base
     /**
      * @inheritDoc
      */
-    protected function getMassActionIds(string $entityType, \stdClass $data): array
+    public function massUpdate(string $entityType, \stdClass $data): array
     {
         if ($entityType == 'ProductAttributeValue') {
+            // attach attributes if it needs
             $this->attachAttribute($data);
         }
 
-        return parent::getMassActionIds($entityType, $data);
+        return parent::massUpdate($entityType, $data);
     }
 
     /**

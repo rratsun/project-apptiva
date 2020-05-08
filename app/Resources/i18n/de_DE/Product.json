@@ -1,6 +1,7 @@
 {
-  "label": {
-    "Mass Update Attributes": "Massenaktualisierungsattribute"
+  "labels": {
+    "Mass Update Attributes": "Massenaktualisierungsattribute",
+    "Insert mode": "Einfügemodus"
   },
   "massActions": {
     "massAttributeUpdate": "Aktualisierung der Massenattribute",

@@ -4,6 +4,8 @@ Espo.define('project-apptiva:views/product/modals/mass-update-attributes', 'view
 
         notEditType: ['enum', 'multiEnum'],
 
+        insertMode: 0,
+
         data: function () {
             return {
                 scope: this.scope,
@@ -14,6 +16,9 @@ Espo.define('project-apptiva:views/product/modals/mass-update-attributes', 'view
         events: {
             'click button[data-action="update"]': function () {
                 this.actionUpdate();
+            },
+            'change input[data-action="insert-mode"]': function () {
+                this.actionInsertMode();
             },
             'click a[data-action="add-attribute"]': function (e) {
                 let attributeId = $(e.currentTarget).data('attribute-id');
@@ -186,6 +191,10 @@ Espo.define('project-apptiva:views/product/modals/mass-update-attributes', 'view
             this.$el.find('ul.filter-list').find('li[data-attribute-id="' + attributeId + '"]').removeClass('hidden');
         },
 
+        actionInsertMode: function () {
+            this.insertMode = this.$el.find('input[data-action="insert-mode"]:checked').length;
+        },
+
         /**
          * Action Update
          */
@@ -209,6 +218,7 @@ Espo.define('project-apptiva:views/product/modals/mass-update-attributes', 'view
                     if (typeof value !== 'undefined') {
                         attributes.data = {"unit": value};
                     }
+                    attributes.insertMode = this.insertMode;
 
                     $.ajax({
                         url: 'ProductAttributeValue' + '/action/massUpdate',
@@ -361,7 +371,7 @@ Espo.define('project-apptiva:views/product/modals/mass-update-attributes', 'view
             this.selectData = this.options.selectData;
             this.byWhere = this.options.byWhere;
 
-            this.header = this.translate(this.scope, 'scopeNamesPlural') + ' &raquo ' + this.translate('Mass Update Attributes', 'label', 'Product');
+            this.header = this.translate(this.scope, 'scopeNamesPlural') + ' &raquo ' + this.translate('Mass Update Attributes', 'labels', 'Product');
         },
 
         /**
