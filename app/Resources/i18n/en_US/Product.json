@@ -1,6 +1,8 @@
 {
   "labels": {
-    "Insert mode": "Insert mode"
+    "Mass Update Attributes": "Mass Update Attributes",
+    "Insert mode": "Insert mode",
+    "Delete mode": "Delete mode"
   },
   "massActions": {
     "massAttributeUpdate": "Mass Attribute Update",

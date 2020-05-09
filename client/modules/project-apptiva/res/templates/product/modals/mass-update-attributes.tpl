@@ -8,6 +8,9 @@
         <div class="cell pull-left" style="margin-left: 40px;">
             <label><input type="checkbox" data-action="insert-mode"> {{translate 'Insert mode' category='labels' scope='Product'}}</label>
         </div>
+        <div class="cell pull-left" style="margin-left: 40px;">
+            <label><input type="checkbox" data-action="delete-mode"> {{translate 'Delete mode' category='labels' scope='Product'}}</label>
+        </div>
         <ul class="dropdown-menu pull-left filter-list">
         {{#each ../attributes}}
             <li data-type="{{type}}" data-attribute-id="{{attributeId}}" data-name="{{name}}">
@@ -21,3 +24,12 @@
 <div class="row">
     <div class="fields-container"></div>
 </div>
+
+<style type="text/css">
+.delete_mode .cell .cell{
+    display: none;
+}
+.delete_mode_multi{
+    display: block !important;
+}
+</style>

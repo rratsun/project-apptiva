@@ -1,7 +1,7 @@
 {
   "fields": {
-    "insertMode": {
-      "type": "int",
+    "massUpdateMode": {
+      "type": "varchar",
       "notStorable": true,
       "layoutListDisabled": true,
       "layoutListSmallDisabled": true,

@@ -6,6 +6,8 @@ Espo.define('project-apptiva:views/product/modals/mass-update-attributes', 'view
 
         insertMode: 0,
 
+        deleteMode: 0,
+
         data: function () {
             return {
                 scope: this.scope,
@@ -20,9 +22,21 @@ Espo.define('project-apptiva:views/product/modals/mass-update-attributes', 'view
             'change input[data-action="insert-mode"]': function () {
                 this.actionInsertMode();
             },
+            'change input[data-action="delete-mode"]': function () {
+                this.actionDeleteMode();
+            },
             'click a[data-action="add-attribute"]': function (e) {
                 let attributeId = $(e.currentTarget).data('attribute-id');
                 this.actionRenderAttribute(attributeId, '');
+
+                let deleteMode = this.deleteMode;
+                setTimeout(function () {
+                    if (deleteMode === 1) {
+                        $('.fields-container .field .multi').each(function () {
+                            $(this).parent().parent().addClass('delete_mode_multi');
+                        });
+                    }
+                }, 100);
             },
             'click button[data-action="reset"]': function (e) {
                 $('a[data-action="removeAttribute"]').click();
@@ -193,6 +207,24 @@ Espo.define('project-apptiva:views/product/modals/mass-update-attributes', 'view
 
         actionInsertMode: function () {
             this.insertMode = this.$el.find('input[data-action="insert-mode"]:checked').length;
+
+            this.$el.find('input[data-action="delete-mode"]:checked').click();
+        },
+
+        actionDeleteMode: function () {
+            this.deleteMode = this.$el.find('input[data-action="delete-mode"]:checked').length;
+
+            if (this.deleteMode === 1) {
+                this.$el.find('.fields-container .field .multi').each(function () {
+                    $(this).parent().parent().addClass('delete_mode_multi');
+                });
+                this.$el.find('.fields-container').addClass('delete_mode');
+            } else {
+                this.$el.find('.fields-container').removeClass('delete_mode');
+                this.$el.find('.fields-container .cell .cell').removeClass('delete_mode_multi');
+            }
+
+            this.$el.find('input[data-action="insert-mode"]:checked').click();
         },
 
         /**
@@ -218,7 +250,14 @@ Espo.define('project-apptiva:views/product/modals/mass-update-attributes', 'view
                     if (typeof value !== 'undefined') {
                         attributes.data = {"unit": value};
                     }
-                    attributes.insertMode = this.insertMode;
+
+                    if (this.insertMode) {
+                        attributes.massUpdateMode = 'insert';
+                    }
+
+                    if (this.deleteMode) {
+                        attributes.massUpdateMode = 'delete';
+                    }
 
                     $.ajax({
                         url: 'ProductAttributeValue' + '/action/massUpdate',
@@ -283,6 +322,10 @@ Espo.define('project-apptiva:views/product/modals/mass-update-attributes', 'view
          * @returns {boolean}
          */
         isValidAttributes(lang) {
+            if (this.deleteMode){
+                return true
+            }
+
             let notValid = false;
             let attributes = {};
             this.renderedAtrributes.forEach(attributeId => {

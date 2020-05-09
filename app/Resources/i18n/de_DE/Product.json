@@ -1,7 +1,8 @@
 {
   "labels": {
     "Mass Update Attributes": "Massenaktualisierungsattribute",
-    "Insert mode": "Einfügemodus"
+    "Insert mode": "Einfügemodus",
+    "Delete mode": "Löschmodus"
   },
   "massActions": {
     "massAttributeUpdate": "Aktualisierung der Massenattribute",
