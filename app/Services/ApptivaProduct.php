@@ -20,41 +20,19 @@ class ApptivaProduct extends Product
      */
     public function getAttributesForMassUpdate(array $productsIds): array
     {
-        // prepare select
-        $select = [
-            'attributeId',
-            ['attribute.name', 'name'],
-            ['attribute.type', 'attributeType'],
-            ['attribute.isMultilang', 'attributeIsMultilang'],
-            ['attribute.typeValue', 'typeValue'],
-        ];
-
-        // for multiLang
-        if ($this->getConfig()->get('isMultilangActive', false)) {
-            foreach ($this->getConfig()->get('inputLanguageList', []) as $locale) {
-                $key = ucfirst(Util::toCamelCase(strtolower($locale)));
-                $select[] = ["attribute.typeValue$key", "typeValue$key"];
-            }
-        }
-
         $attributes = $this
             ->getEntityManager()
-            ->getRepository('ProductAttributeValue')
-            ->select($select)
-            ->where(
-                [
-                    'productId' => $productsIds,
-                    'scope'     => 'Global'
-                ]
-            )
-            ->leftJoin(['attribute'])
+            ->getRepository('Attribute')
             ->find()
             ->toArray();
 
         // prepare result
         $result = [];
         foreach ($attributes as $attribute) {
-            $result[$attribute['attributeId']] = $attribute;
+            $result[$attribute['id']] = $attribute;
+            $result[$attribute['id']]['attributeId'] = $attribute['id'];
+            $result[$attribute['id']]['attributeType'] = $attribute['type'];
+            $result[$attribute['id']]['attributeIsMultilang'] = $attribute['isMultilang'];
         }
 
         return ['attributes' => $result];
