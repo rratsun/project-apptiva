@@ -1,0 +1,7 @@
+{
+  "fields": {
+    "typeValue": {
+      "view": "project-apptiva:views/attribute/fields/type-value"
+    }
+  }
+}
