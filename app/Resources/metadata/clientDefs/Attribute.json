@@ -1,6 +1,0 @@
-{
-  "recordViews": {
-    "detail": "project-apptiva:views/attribute/record/detail",
-    "edit": "project-apptiva:views/attribute/record/edit"
-  }
-}
