@@ -21,6 +21,8 @@
 Espo.define('project-apptiva:views/attribute/fields/type-value', 'pim:views/attribute/fields/type-value',
     Dep => Dep.extend({
 
+        _timeouts: {},
+
         events: _.extend({
             'click [data-action="addNewValue"]': function (e) {
                 e.stopPropagation();
@@ -54,52 +56,34 @@ Espo.define('project-apptiva:views/attribute/fields/type-value', 'pim:views/attr
                 this.reRender();
             });
 
-            this.listenTo(this.model, 'change', () => this.hideMultilangLocales());
-            this.listenTo(this, 'after:render after:save cancel:save', () => this.hideMultilangLocales());
-        },
-
-        hideMultilangLocales() {
-            const middle = this.getParentView();
-            if (this.model.get('type') === 'enum' && this.model.get('isMultilang') && this.mode === 'edit') {
-                this.langFieldNames.forEach(field => {
-                    const view = middle.getView(field);
-                    if (view) {
-                        view.hide();
-                        view.setReadOnly();
-                        view.reRender();
-                    }
-                });
-            } else {
-                const record = middle.getParentView();
-                if (record && record.dynamicLogic) {
-                    record.dynamicLogic.process();
-                }
-            }
+            this.listenTo(this, 'change', () => this.reRender());
         },
 
         modifyDataByType(data) {
-            const optionGroups = (this.selectedComplex[this.name] || []).map((item, index) => {
-                return {
-                    options: [
-                        {
-                            name: this.name,
-                            value: item,
-                            shortLang: ''
-                        },
-                        ...this.langFieldNames.map(name => {
-                            return {
-                                name: name,
-                                value: (this.selectedComplex[name] || [])[index],
-                                shortLang: name.slice(-4, -2).toLowerCase() + '_' + name.slice(-2).toUpperCase()
-                            }
-                        })
-                    ]
-                }
-            });
+            data = Espo.Utils.cloneDeep(data);
 
-            return _.extend({
-                optionGroups: optionGroups
-            }, Dep.prototype.modifyDataByType.call(this, data));
+            if (this.isEnumsMultilang()) {
+                data.optionGroups = (this.selectedComplex[this.name] || []).map((item, index) => {
+                    return {
+                        options: [
+                            {
+                                name: this.name,
+                                value: item,
+                                shortLang: ''
+                            },
+                            ...this.langFieldNames.map(name => {
+                                return {
+                                    name: name,
+                                    value: (this.selectedComplex[name] || [])[index],
+                                    shortLang: name.slice(-4, -2).toLowerCase() + '_' + name.slice(-2).toUpperCase()
+                                }
+                            })
+                        ]
+                    }
+                });
+            }
+
+            return data;
         },
 
         getLangFieldNames() {
@@ -123,7 +107,7 @@ Espo.define('project-apptiva:views/attribute/fields/type-value', 'pim:views/attr
         setMode(mode) {
             Dep.prototype.setMode.call(this, mode);
 
-            if (this.model.get('type') === 'enum' && this.model.get('isMultilang') && mode === 'edit') {
+            if (this.isEnumsMultilang() && mode !== 'list') {
                 this.template = 'project-apptiva:attribute/fields/type-value/enum-multilang/' + mode;
             }
         },
@@ -164,7 +148,7 @@ Espo.define('project-apptiva:views/attribute/fields/type-value', 'pim:views/attr
         modifyFetchByType(data) {
             Dep.prototype.modifyFetchByType.call(this, data);
 
-            if (this.model.get('type') === 'enum' && this.model.get('isMultilang')) {
+            if (this.isEnumsMultilang()) {
                 this.fetchFromDom();
                 Object.entries(this.selectedComplex).forEach(([key, value]) => data[key] = value);
             }
@@ -173,7 +157,7 @@ Espo.define('project-apptiva:views/attribute/fields/type-value', 'pim:views/attr
         },
 
         fetchFromDom() {
-            if (this.model.get('type') === 'enum' && this.model.get('isMultilang')) {
+            if (this.isEnumsMultilang()) {
                 const data = {};
                 data[this.name] = [];
                 this.langFieldNames.forEach(name => data[name] = []);
@@ -189,6 +173,73 @@ Espo.define('project-apptiva:views/attribute/fields/type-value', 'pim:views/attr
                 Dep.prototype.fetchFromDom.call(this);
             }
         },
+
+        validateRequired() {
+            const values = this.model.get(this.name);
+            let error = !values || !values.length;
+            values.forEach((value, i) => {
+                if (!value) {
+                    let msg = this.translate('fieldIsRequired', 'messages').replace('{field}', this.translate('Value'));
+                    this.showValidationMessage(msg, `input[data-name="${this.name}"][data-index="${i}"]`);
+                    error = true;
+                }
+            });
+
+            return error;
+        },
+
+        showValidationMessage: function (message, target) {
+            var $el;
+
+            target = target || '.array-control-container';
+
+            if (typeof target === 'string' || target instanceof String) {
+                $el = this.$el.find(target);
+            } else {
+                $el = $(target);
+            }
+
+            if (!$el.size() && this.$element) {
+                $el = this.$element;
+            }
+            $el.popover({
+                placement: 'bottom',
+                container: 'body',
+                content: message,
+                trigger: 'manual',
+                html: true
+            }).popover('show');
+
+            var isDestroyed = false;
+
+            $el.closest('.field').one('mousedown click', function () {
+                if (isDestroyed) return;
+                $el.popover('destroy');
+                isDestroyed = true;
+            });
+
+            this.once('render remove', function () {
+                if (isDestroyed) return;
+                if ($el) {
+                    $el.popover('destroy');
+                    isDestroyed = true;
+                }
+            });
+
+            if (this._timeouts[target]) {
+                clearTimeout(this._timeouts[target]);
+            }
+
+            this._timeouts[target] = setTimeout(function () {
+                if (isDestroyed) return;
+                $el.popover('destroy');
+                isDestroyed = true;
+            }, 3000);
+        },
+
+        isEnumsMultilang() {
+            return (this.model.get('type') === 'enum' || this.model.get('type') === 'multiEnum') && this.model.get('isMultilang');
+        }
 
     })
 );

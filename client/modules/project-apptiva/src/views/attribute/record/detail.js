@@ -28,7 +28,7 @@ Espo.define('project-apptiva:views/attribute/record/detail', 'pim:views/attribut
         },
 
         clearMultilangLocaleViews() {
-            if (this.model.get('type') === 'enum' && this.model.get('isMultilang')) {
+            if (this.model.get('type') === 'enum' || this.model.get('type') === 'multiEnum' && this.model.get('isMultilang')) {
                 this.getLangFieldNameList().forEach(field => this.model.defs.fields[field].view = '');
             }
         },
