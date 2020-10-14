@@ -32,8 +32,7 @@ Espo.define('project-apptiva:views/attribute/fields/type-value', 'pim:views/attr
             'click [data-action="removeGroup"]': function (e) {
                 e.stopPropagation();
                 e.preventDefault();
-                let index = $(e.currentTarget).data('index');
-                this.removeGroup(index);
+                this.removeGroup($(e.currentTarget));
             },
             'change input[data-name][data-index]': function (e) {
                 e.stopPropagation();
@@ -57,6 +56,41 @@ Espo.define('project-apptiva:views/attribute/fields/type-value', 'pim:views/attr
             });
 
             this.listenTo(this, 'change', () => this.reRender());
+        },
+
+        afterRender: function () {
+            if (this.mode === 'edit') {
+                this.$list = this.$el.find('.list-group');
+                var $select = this.$select = this.$el.find('.select');
+
+                if (!this.params.options) {
+                    $select.on('keypress', function (e) {
+                        if (e.keyCode === 13) {
+                            var value = $select.val().toString();
+                            if (this.noEmptyString) {
+                                if (value === '') {
+                                    return;
+                                }
+                            }
+                            this.addValue(value);
+                            $select.val('');
+                        }
+                    }.bind(this));
+                }
+            }
+
+            if (this.mode === 'search') {
+                this.renderSearch();
+            }
+
+            let deletedRow = $("input[value=todel]").parents('.list-group-item');
+            deletedRow.find('a[data-action=removeGroup]').remove();
+            deletedRow.hide();
+
+            let removeGroupButtons = $('a[data-action=removeGroup]');
+            if (removeGroupButtons.length === 1) {
+                removeGroupButtons.remove();
+            }
         },
 
         modifyDataByType(data) {
@@ -129,15 +163,18 @@ Espo.define('project-apptiva:views/attribute/fields/type-value', 'pim:views/attr
             this.trigger('change');
         },
 
-        removeGroup(index) {
+        removeGroup(el) {
+            let index = el.data('index');
             let value = this.selectedComplex[this.name] || [];
-            value.splice(index, 1);
+            value[index] = 'todel';
+            // value.splice(index, 1);
             let data = {
                 [this.name]: value
             };
             this.langFieldNames.forEach(name => {
                 let value = this.selectedComplex[name] || [];
-                value.splice(index, 1);
+                value[index] = 'todel';
+                // value.splice(index, 1);
                 data[name] = value;
             });
             this.selectedComplex = data;
