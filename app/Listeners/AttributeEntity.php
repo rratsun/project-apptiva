@@ -3,7 +3,9 @@
 namespace ProjectApptiva\Listeners;
 
 use Espo\Core\Exceptions\BadRequest;
+use Espo\Core\Utils\Json;
 use Espo\ORM\Entity;
+use Espo\ORM\EntityCollection;
 use Treo\Core\EventManager\Event;
 use Treo\Core\Utils\Util;
 use Treo\Listeners\AbstractListener;
@@ -33,8 +35,9 @@ class AttributeEntity extends AbstractListener
             $this->deletePositions($entity, $deletedPositions);
         }
 
-        if (!$entity->isNew() && in_array($entity->get('type'), ['enum']) && $this->isEnumTypeValueValid($entity)) {
-            $this->cascadeUpdate($entity, $deletedPositions);
+        if (!$entity->isNew()) {
+            $this->cascadeEnumUpdate($entity, $deletedPositions);
+            $this->cascadeMultiEnumUpdate($entity, $deletedPositions);
         }
     }
 
@@ -60,9 +63,20 @@ class AttributeEntity extends AbstractListener
     /**
      * @param Entity $entity
      * @param array  $deletedPositions
+     *
+     * @return bool
+     * @throws BadRequest
      */
-    protected function cascadeUpdate(Entity $entity, array $deletedPositions)
+    protected function cascadeEnumUpdate(Entity $entity, array $deletedPositions): bool
     {
+        if ($entity->get('type') != 'enum') {
+            return true;
+        }
+
+        if (!$this->isEnumTypeValueValid($entity)) {
+            return true;
+        }
+
         /** @var string $attributeId */
         $attributeId = $entity->get('id');
 
@@ -101,6 +115,88 @@ class AttributeEntity extends AbstractListener
         if (!empty($sql)) {
             $this->getEntityManager()->nativeQuery(implode(';', $sql));
         }
+
+        return true;
+    }
+
+    /**
+     * @param Entity $attribute
+     * @param array  $deletedPositions
+     *
+     * @return bool
+     * @throws BadRequest
+     */
+    protected function cascadeMultiEnumUpdate(Entity $attribute, array $deletedPositions): bool
+    {
+        if ($attribute->get('type') != 'multiEnum') {
+            return true;
+        }
+
+        if (!$this->isEnumTypeValueValid($attribute)) {
+            return true;
+        }
+
+        // old type value
+        $oldTypeValue = $attribute->getFetched('typeValue');
+
+        // delete
+        foreach ($deletedPositions as $deletedPosition) {
+            unset($oldTypeValue[$deletedPosition]);
+        }
+
+        // prepare became values
+        $becameValues = [];
+        foreach (array_values($oldTypeValue) as $k => $v) {
+            $becameValues[$v] = $attribute->get('typeValue')[$k];
+        }
+
+        /** @var EntityCollection $pavs */
+        $pavs = $attribute->get('productAttributeValues');
+
+        if ($pavs->count() > 0) {
+            foreach ($pavs as $pav) {
+                /**
+                 * First, prepare main value
+                 */
+                $values = !empty($pav->get('value')) ? Json::decode($pav->get('value'), true) : [];
+                if (!empty($values)) {
+                    $newValues = [];
+                    foreach ($values as $value) {
+                        if (isset($becameValues[$value])) {
+                            $newValues[] = $becameValues[$value];
+                        }
+                    }
+                    $pav->set('value', Json::encode($newValues));
+                    $values = $newValues;
+                }
+
+                $sqlValues = ["value='" . $pav->get('value') . "'"];
+
+                /**
+                 * Second, update locales
+                 */
+                if ($this->getConfig()->get('isMultilangActive', false)) {
+                    foreach ($this->getConfig()->get('inputLanguageList', []) as $language) {
+                        $locale = ucfirst(Util::toCamelCase(strtolower($language)));
+                        $localeValues = [];
+                        foreach ($values as $value) {
+                            $localeValues[] = $attribute->get("typeValue{$locale}")[array_search($value, $attribute->get('typeValue'))];
+                        }
+                        $pav->set("value{$locale}", Json::encode($localeValues));
+                        $sqlValues[] = "value_" . strtolower($language) . "='" . $pav->get("value{$locale}") . "'";
+                    }
+                }
+
+                /**
+                 * Third, set to DB
+                 */
+                $this
+                    ->getEntityManager()
+                    ->nativeQuery("UPDATE product_attribute_value SET " . implode(",", $sqlValues) . " WHERE id='" . $pav->get('id') . "'");
+            }
+        }
+
+        return true;
     }
 
     /**
