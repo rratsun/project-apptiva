@@ -18,6 +18,33 @@ use Treo\Listeners\AbstractListener;
 class AttributeEntity extends AbstractListener
 {
     /**
+     * @param string $str
+     *
+     * @return string
+     */
+    public static function prepareUmlauts(string $str): string
+    {
+        $str = str_replace('\u00c4', 'Ä', $str);
+        $str = str_replace('\u00e4', 'ä', $str);
+        $str = str_replace('\u00cb', 'Ë', $str);
+        $str = str_replace('\u00eb', 'ë', $str);
+        $str = str_replace('\u00cf', 'Ï', $str);
+        $str = str_replace('\u00ef', 'ï', $str);
+        $str = str_replace('N\u0308', 'N̈', $str);
+        $str = str_replace('n\u0308', 'n̈', $str);
+        $str = str_replace('\u00d6', 'Ö', $str);
+        $str = str_replace('\u00f6', 'ö', $str);
+        $str = str_replace('T\u0308', 'T̈', $str);
+        $str = str_replace('\u1e97', 'ẗ', $str);
+        $str = str_replace('\u00dc', 'Ü', $str);
+        $str = str_replace('\u00fc', 'ü', $str);
+        $str = str_replace('\u0178', 'Ÿ', $str);
+        $str = str_replace('\u00ff', 'ÿ', $str);
+
+        return $str;
+    }
+
+    /**
      * @param Event $event
      *
      * @throws BadRequest
@@ -170,7 +197,7 @@ class AttributeEntity extends AbstractListener
                     $values = $newValues;
                 }
 
-                $sqlValues = ["value='" . $pav->get('value') . "'"];
+                $sqlValues = ["value='" . self::prepareUmlauts($pav->get('value')) . "'"];
 
                 /**
                  * Second, update locales
@@ -183,7 +210,7 @@ class AttributeEntity extends AbstractListener
                             $localeValues[] = $attribute->get("typeValue{$locale}")[array_search($value, $attribute->get('typeValue'))];
                         }
                         $pav->set("value{$locale}", Json::encode($localeValues));
-                        $sqlValues[] = "value_" . strtolower($language) . "='" . $pav->get("value{$locale}") . "'";
+                        $sqlValues[] = "value_" . strtolower($language) . "='" . self::prepareUmlauts($pav->get("value{$locale}")) . "'";
                     }
                 }
 
