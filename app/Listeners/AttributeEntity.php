@@ -18,30 +18,17 @@ use Treo\Listeners\AbstractListener;
 class AttributeEntity extends AbstractListener
 {
     /**
-     * @param string $str
+     * @param string|null $str
      *
      * @return string
      */
-    public static function prepareUmlauts(string $str): string
+    public static function prepareUmlauts($str): string
     {
-        $str = str_replace('\u00c4', 'Ä', $str);
-        $str = str_replace('\u00e4', 'ä', $str);
-        $str = str_replace('\u00cb', 'Ë', $str);
-        $str = str_replace('\u00eb', 'ë', $str);
-        $str = str_replace('\u00cf', 'Ï', $str);
-        $str = str_replace('\u00ef', 'ï', $str);
-        $str = str_replace('N\u0308', 'N̈', $str);
-        $str = str_replace('n\u0308', 'n̈', $str);
-        $str = str_replace('\u00d6', 'Ö', $str);
-        $str = str_replace('\u00f6', 'ö', $str);
-        $str = str_replace('T\u0308', 'T̈', $str);
-        $str = str_replace('\u1e97', 'ẗ', $str);
-        $str = str_replace('\u00dc', 'Ü', $str);
-        $str = str_replace('\u00fc', 'ü', $str);
-        $str = str_replace('\u0178', 'Ÿ', $str);
-        $str = str_replace('\u00ff', 'ÿ', $str);
+        if (empty($str)) {
+            return '';
+        }
 
-        return $str;
+        return html_entity_decode(preg_replace('/\\\u([\da-fA-F]{4})/', '&#x\1;', $str));
     }
 
     /**
